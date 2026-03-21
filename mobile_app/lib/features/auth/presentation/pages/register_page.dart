@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mobile_app/core/widgets/app_logo.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../data/repositories/auth_repository.dart';
@@ -15,6 +17,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _repository = AuthRepository();
 
   final _fullNameController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -26,6 +29,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   void dispose() {
     _fullNameController.dispose();
+    _phoneController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -84,8 +88,10 @@ class _RegisterPageState extends State<RegisterPage> {
 
     try {
       await _repository.register(
+        nombreCompleto: _fullNameController.text,
         email: _emailController.text,
         password: _passwordController.text,
+        telefono: _phoneController.text,
       );
 
       if (!mounted) return;
@@ -115,6 +121,9 @@ class _RegisterPageState extends State<RegisterPage> {
         case 'network-request-failed':
           message = 'Sin conexión. Verifique su red e intente de nuevo';
           break;
+        case 'user-null':
+          message = 'No fue posible obtener el usuario registrado';
+          break;
         default:
           message = 'Ocurrió un error al crear la cuenta';
       }
@@ -122,15 +131,37 @@ class _RegisterPageState extends State<RegisterPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
       );
-    } catch (_) {
+    } on FirebaseException catch (e) {
       if (!mounted) return;
 
+      String message = 'No fue posible guardar la información del productor';
+
+      switch (e.code) {
+        case 'permission-denied':
+          message = 'No hay permisos para guardar la información del productor';
+          break;
+        case 'unavailable':
+          message = 'Firestore no está disponible en este momento';
+          break;
+        default:
+          message = 'Error al guardar la información del productor';
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Ocurrió un error inesperado'),
-        ),
+        SnackBar(content: Text(message)),
       );
-    } finally {
+    } catch (e, stackTrace) {
+  debugPrint('ERROR INESPERADO EN REGISTRO: $e');
+  debugPrintStack(stackTrace: stackTrace);
+
+  if (!mounted) return;
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('Ocurrió un error inesperado: $e'),
+    ),
+  );
+} finally {
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -172,7 +203,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         color: const Color(0xFFEDF7EE),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.agriculture, color: primary),
+                      child: const AppLogo(),
                     ),
                     const SizedBox(width: 14),
                     const Expanded(
@@ -189,7 +220,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Registre su productor para comenzar.',
+                            'Registrese productor para comenzar.',
                             style: TextStyle(
                               fontSize: 15,
                               color: softText,
@@ -211,6 +242,14 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 18),
 
                 AuthTextField(
+                  label: 'Teléfono (opcional)',
+                  controller: _phoneController,
+                  hintText: '',
+                  keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 18),
+
+                AuthTextField(
                   label: 'Correo electrónico',
                   controller: _emailController,
                   hintText: '',
@@ -222,7 +261,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 AuthTextField(
                   label: 'Contraseña',
                   controller: _passwordController,
-                  hintText: '',
+                  hintText: '********',
                   obscureText: _obscurePassword,
                   validator: _validatePassword,
                   suffixIcon: IconButton(
@@ -241,7 +280,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 AuthTextField(
                   label: 'Confirmar contraseña',
                   controller: _confirmPasswordController,
-                  hintText: '',
+                  hintText: '********',
                   obscureText: _obscureConfirmPassword,
                   validator: _validateConfirmPassword,
                   suffixIcon: IconButton(
@@ -286,6 +325,16 @@ class _RegisterPageState extends State<RegisterPage> {
                               fontWeight: FontWeight.w800,
                             ),
                           ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(context, '/login');
+                    },
+                    child: const Text('¿Ya tiene cuenta? Iniciar sesión'),
                   ),
                 ),
               ],
