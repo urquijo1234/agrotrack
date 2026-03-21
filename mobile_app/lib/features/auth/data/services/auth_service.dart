@@ -15,4 +15,18 @@ class AuthService {
       password: password,
     );
   }
+
+  Future<UserCredential> signInWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
+    return await _firebaseAuth.signInWithEmailAndPassword(
+      email: email.trim(),
+      password: password,
+    );
+  }
+
+  Future<void> signOut() async {
+    await _firebaseAuth.signOut();
+  }
 }
