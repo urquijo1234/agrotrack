@@ -116,6 +116,25 @@ class _DashboardPlaceholderPageState extends State<DashboardPlaceholderPage> {
                 SizedBox(
                   width: double.infinity,
                   height: 52,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/predios');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: const Text(
+                      'Gestionar predios',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
                   child: ElevatedButton.icon(
                     onPressed: _isLoggingOut ? null : _logout,
                     icon: const Icon(Icons.logout),

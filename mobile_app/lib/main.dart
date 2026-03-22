@@ -1,6 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile_app/features/predios/presentation/pages/predio_create_page.dart';
+import 'package:mobile_app/features/predios/presentation/pages/predios_list_page.dart';
+import 'features/predios/presentation/pages/predio_edit_page.dart';
 import 'features/auth/presentation/pages/auth_gate_page.dart';
+import 'features/predios/presentation/pages/predio_detail_page.dart';
+import 'features/lotes/presentation/pages/lote_create_page.dart';
+import 'features/lotes/presentation/pages/lote_detail_page.dart';
+import 'features/lotes/presentation/pages/lote_edit_page.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
 import 'features/home/presentation/pages/dashboard_placeholder_page.dart';
@@ -36,6 +43,13 @@ class AgroTrackApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
         '/dashboard': (context) => const DashboardPlaceholderPage(),
+        '/predios': (context) => const PrediosListPage(),
+        '/predios/create': (context) => const PredioCreatePage(),
+        '/predios/edit': (context) => const PredioEditPage(),
+        '/predios/detail': (context) => const PredioDetailPage(),
+        '/lotes/create': (context) => const LoteCreatePage(),
+        '/lotes/detail': (context) => const LoteDetailPage(),        
+        '/lotes/edit': (context) => const LoteEditPage(),
       },
     );
   }
