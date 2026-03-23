@@ -301,23 +301,26 @@ Future<void> _changeEstadoLote(String nuevoEstado) async {
             children: [
               Expanded(
                 child: _ActionCard(
-                  icon: Icons.eco_outlined,
-                  title: 'Registrar evento',
-                  description: 'Inicia el registro del evento agrícola desde este lote.',
-                  onTap: _lote!.estadoLote == 'ACTIVO'
-    ? () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Próximamente: registrar evento')),
-        );
-      }
-    : () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('El lote está archivado y no permite nuevos eventos'),
-          ),
-        );
-      },
-                ),
+  icon: Icons.eco_outlined,
+  title: 'Registrar evento',
+  description: 'Inicia el registro del evento agrícola desde este lote.',
+  onTap: _lote!.estadoLote == 'ACTIVO'
+      ? () {
+          // Navegamos al selector pasando el lote actual
+          Navigator.pushNamed(
+            context,
+            '/eventos/seleccionar',
+            arguments: _lote,
+          );
+        }
+      : () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('El lote está archivado y no permite nuevos eventos'),
+            ),
+          );
+        },
+),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -326,10 +329,12 @@ Future<void> _changeEstadoLote(String nuevoEstado) async {
                   title: 'Ver historial',
                   description: 'Consulta la trazabilidad histórica de este lote.',
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Próximamente: historial del lote')),
-                    );
-                  },
+  Navigator.pushNamed(
+    context,
+    '/lotes/historial',
+    arguments: _lote,
+  );
+},
                 ),
               ),
             ],

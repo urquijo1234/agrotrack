@@ -1,0 +1,233 @@
+import 'package:flutter/material.dart';
+import '../../../lotes/domain/models/lote.dart';
+import '../../domain/models/evento_agricola.dart';
+import '../../data/repositories/eventos_repository.dart';
+
+class InsumoCreatePage extends StatefulWidget {
+  const InsumoCreatePage({super.key});
+
+  @override
+  State<InsumoCreatePage> createState() => _InsumoCreatePageState();
+}
+
+class _InsumoCreatePageState extends State<InsumoCreatePage> {
+  final _formKey = GlobalKey<FormState>();
+  final _repository = EventosRepository();
+
+  final _nombreInsumoController = TextEditingController();
+  final _ingredienteActivoController = TextEditingController();
+  final _dosisController = TextEditingController();
+  final _areaTratadaController = TextEditingController();
+  final _responsableController = TextEditingController();
+  final _motivoController = TextEditingController();
+  final _observacionesController = TextEditingController();
+
+  DateTime _fechaEvento = DateTime.now();
+  String _tipoInsumo = 'Fertilizante';
+  String _unidadDosis = 'kg/ha';
+  String _metodoAplicacion = 'Manual';
+  
+  bool _isSaving = false;
+  Lote? _lote;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Lote) {
+      _lote = args;
+    }
+  }
+
+  @override
+  void dispose() {
+    _nombreInsumoController.dispose();
+    _ingredienteActivoController.dispose();
+    _dosisController.dispose();
+    _areaTratadaController.dispose();
+    _responsableController.dispose();
+    _motivoController.dispose();
+    _observacionesController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _fechaEvento,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null && picked != _fechaEvento) {
+      setState(() => _fechaEvento = picked);
+    }
+  }
+
+  Future<void> _saveInsumo() async {
+    if (!_formKey.currentState!.validate() || _lote == null) return;
+    setState(() => _isSaving = true);
+
+    try {
+      final dosis = double.parse(_dosisController.text.trim().replaceAll(',', '.'));
+      final areaTratada = double.parse(_areaTratadaController.text.trim().replaceAll(',', '.'));
+
+      // Payload exacto según Tabla 6
+      final detalleInsumo = {
+        'tipoInsumo': _tipoInsumo,
+        'nombreInsumo': _nombreInsumoController.text.trim(),
+        'ingredienteActivo': _ingredienteActivoController.text.trim().isNotEmpty ? _ingredienteActivoController.text.trim() : null,
+        'dosis': dosis,
+        'unidadDosis': _unidadDosis,
+        'metodoAplicacion': _metodoAplicacion,
+        'areaTratadaHa': areaTratada,
+        'responsableAplicacion': _responsableController.text.trim().isNotEmpty ? _responsableController.text.trim() : null,
+        'motivoAplicacion': _motivoController.text.trim().isNotEmpty ? _motivoController.text.trim() : null,
+        'observaciones': _observacionesController.text.trim().isNotEmpty ? _observacionesController.text.trim() : null,
+      };
+
+      final evento = EventoAgricola(
+        eventoId: '', 
+        loteId: _lote!.loteId,
+        predioId: _lote!.predioId,
+        productorId: _lote!.productorId,
+        tipoEvento: TipoEvento.APLICACION_INSUMO,
+        fechaEvento: _fechaEvento,
+        descripcion: 'Aplicación de $_tipoInsumo (${_nombreInsumoController.text.trim()})',
+        detalleEvento: detalleInsumo,
+      );
+
+      await _repository.createEvento(evento);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Aplicación de insumo registrada exitosamente.')),
+      );
+      Navigator.pop(context, true); // Regresamos al selector
+    
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al registrar: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_lote == null) return const Scaffold(body: Center(child: Text('Error: Lote no provisto')));
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F9F5),
+      appBar: AppBar(title: const Text('Aplicar Insumo')),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            ListTile(
+              title: const Text('Fecha de Aplicación'),
+              subtitle: Text("${_fechaEvento.day}/${_fechaEvento.month}/${_fechaEvento.year}"),
+              trailing: const Icon(Icons.calendar_today),
+              shape: RoundedRectangleBorder(
+                side: const BorderSide(color: Color(0xFFD7DED3)),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              tileColor: Colors.white,
+              onTap: () => _selectDate(context),
+            ),
+            const SizedBox(height: 16),
+
+            DropdownButtonFormField<String>(
+              value: _tipoInsumo,
+              decoration: const InputDecoration(labelText: 'Tipo de Insumo *', filled: true, fillColor: Colors.white, border: OutlineInputBorder()),
+              items: ['Fertilizante', 'Herbicida', 'Fungicida', 'Insecticida', 'Coadyuvante', 'Otro']
+                  .map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+              onChanged: (val) => setState(() => _tipoInsumo = val!),
+            ),
+            const SizedBox(height: 16),
+
+            TextFormField(
+              controller: _nombreInsumoController,
+              decoration: const InputDecoration(labelText: 'Nombre Comercial *', filled: true, fillColor: Colors.white, border: OutlineInputBorder()),
+              validator: (v) => v!.isEmpty ? 'Requerido' : null,
+            ),
+            const SizedBox(height: 16),
+
+            TextFormField(
+              controller: _ingredienteActivoController,
+              decoration: const InputDecoration(labelText: 'Ingrediente Activo (Opcional)', filled: true, fillColor: Colors.white, border: OutlineInputBorder()),
+            ),
+            const SizedBox(height: 16),
+
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: TextFormField(
+                    controller: _dosisController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(labelText: 'Dosis *', filled: true, fillColor: Colors.white, border: OutlineInputBorder()),
+                    validator: (v) => v!.isEmpty ? 'Requerido' : null,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _unidadDosis,
+                    decoration: const InputDecoration(labelText: 'Unidad', filled: true, fillColor: Colors.white, border: OutlineInputBorder()),
+                    items: ['kg/ha', 'L/ha', 'mL/L', 'g/L', 'kg', 'L', 'mL', 'g']
+                        .map((u) => DropdownMenuItem(value: u, child: Text(u))).toList(),
+                    onChanged: (val) => setState(() => _unidadDosis = val!),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            DropdownButtonFormField<String>(
+              value: _metodoAplicacion,
+              decoration: const InputDecoration(labelText: 'Método de Aplicación *', filled: true, fillColor: Colors.white, border: OutlineInputBorder()),
+              items: ['Manual', 'Fumigadora de espalda', 'Mecanizado', 'Riego', 'Otro']
+                  .map((m) => DropdownMenuItem(value: m, child: Text(m))).toList(),
+              onChanged: (val) => setState(() => _metodoAplicacion = val!),
+            ),
+            const SizedBox(height: 16),
+
+            TextFormField(
+              controller: _areaTratadaController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(labelText: 'Área tratada (ha) *', filled: true, fillColor: Colors.white, border: OutlineInputBorder()),
+              validator: (v) => v!.isEmpty ? 'Requerido' : null,
+            ),
+            const SizedBox(height: 16),
+
+            TextFormField(
+              controller: _motivoController,
+              decoration: const InputDecoration(labelText: 'Motivo (ej. Nutrición, Plaga)', filled: true, fillColor: Colors.white, border: OutlineInputBorder()),
+            ),
+            const SizedBox(height: 16),
+
+            TextFormField(
+              controller: _responsableController,
+              decoration: const InputDecoration(labelText: 'Responsable (Opcional)', filled: true, fillColor: Colors.white, border: OutlineInputBorder()),
+            ),
+            const SizedBox(height: 32),
+
+            SizedBox(
+              height: 52,
+              child: ElevatedButton(
+                onPressed: _isSaving ? null : _saveInsumo,
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E7D32), foregroundColor: Colors.white),
+                child: _isSaving 
+                  ? const CircularProgressIndicator(color: Colors.white) 
+                  : const Text('Guardar Aplicación', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

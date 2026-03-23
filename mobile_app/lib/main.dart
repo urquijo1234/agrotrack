@@ -1,5 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile_app/features/eventos_agricolas/presentation/pages/cosecha_create_page.dart';
+import 'package:mobile_app/features/eventos_agricolas/presentation/pages/evento_detail_page.dart';
+import 'package:mobile_app/features/eventos_agricolas/presentation/pages/insumo_create_page.dart';
+import 'package:mobile_app/features/eventos_agricolas/presentation/pages/lote_historial_page.dart';
+import 'package:mobile_app/features/eventos_agricolas/presentation/pages/sync_queue_page.dart';
+import 'package:mobile_app/features/home/presentation/pages/dashboard_page.dart';
 import 'package:mobile_app/features/predios/presentation/pages/predio_create_page.dart';
 import 'package:mobile_app/features/predios/presentation/pages/predios_list_page.dart';
 import 'features/predios/presentation/pages/predio_edit_page.dart';
@@ -10,7 +16,8 @@ import 'features/lotes/presentation/pages/lote_detail_page.dart';
 import 'features/lotes/presentation/pages/lote_edit_page.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
-import 'features/home/presentation/pages/dashboard_placeholder_page.dart';
+import 'features/eventos_agricolas/presentation/pages/seleccionar_evento_page.dart';
+import 'features/eventos_agricolas/presentation/pages/siembra_create_page.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -42,7 +49,9 @@ class AgroTrackApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
-        '/dashboard': (context) => const DashboardPlaceholderPage(),
+        '/dashboard': (context) => const DashboardPage(), // <-- Si renombraste la clase
+'/informes': (context) => const Scaffold(body: Center(child: Text('Módulo de Informes en construcción'))),
+'/perfil': (context) => const Scaffold(body: Center(child: Text('Perfil en construcción'))),
         '/predios': (context) => const PrediosListPage(),
         '/predios/create': (context) => const PredioCreatePage(),
         '/predios/edit': (context) => const PredioEditPage(),
@@ -50,6 +59,13 @@ class AgroTrackApp extends StatelessWidget {
         '/lotes/create': (context) => const LoteCreatePage(),
         '/lotes/detail': (context) => const LoteDetailPage(),        
         '/lotes/edit': (context) => const LoteEditPage(),
+        '/eventos/seleccionar': (context) => const SeleccionarEventoPage(),
+'/eventos/crear_siembra': (context) => const SiembraCreatePage(),
+'/eventos/crear_insumo': (context) => const InsumoCreatePage(),
+'/eventos/crear_cosecha': (context) => const CosechaCreatePage(),
+'/lotes/historial': (context) => const LoteHistorialPage(),
+'/eventos/detalle': (context) => const EventoDetailPage(),
+'/sync_queue': (context) => const SyncQueuePage(),
       },
     );
   }
