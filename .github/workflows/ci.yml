@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: mobile_app # Esto obliga a todos los comandos a ejecutarse aquí
+        working-directory: mobile_app
     
     steps:
       - name: Checkout código
@@ -38,7 +38,7 @@ jobs:
       - name: Configurar Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0' # Asegúrate que sea la tuya, ej: 3.27.0
+          flutter-version: '3.38.7' # <-- AQUÍ OBLIGAMOS AL SERVIDOR A USAR TU VERSIÓN EXACTA
           channel: 'stable'
           cache: true
           
@@ -84,6 +84,7 @@ jobs:
       - name: Configurar Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.38.7' # <-- Y AQUÍ TAMBIÉN
           channel: 'stable'
           cache: true
           
