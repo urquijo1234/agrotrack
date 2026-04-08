@@ -337,6 +337,19 @@ Future<void> _changeEstadoLote(String nuevoEstado) async {
 },
                 ),
               ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _ActionCard(
+                  icon: Icons.description_outlined,
+                  title: 'Informes ICA',
+                  description: 'Gestiona los informes trisemestrales de este lote.',
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    '/informes/lista',
+                    arguments: _lote,
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 18),

@@ -157,6 +157,7 @@ class _CosechaCreatePageState extends State<CosechaCreatePage> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: DropdownButtonFormField<String>(
+                    isExpanded: true,
                     value: _unidadProduccion,
                     decoration: const InputDecoration(labelText: 'Unidad', filled: true, fillColor: Colors.white, border: OutlineInputBorder()),
                     items: ['kg', 't', 'cajas', 'piñas', 'unidades', 'bultos']

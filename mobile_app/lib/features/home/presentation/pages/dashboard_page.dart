@@ -76,6 +76,7 @@ class _DashboardPageState extends State<DashboardPage> {
         final recientes = await _dashboardRepo.getLotesRecientes(user.uid);
         final todosActivos = await _dashboardRepo.getActiveLotes(user.uid); // Carga para el selector
         final pending = await _eventosRepo.getPendingSyncCount();
+        final informes = await _dashboardRepo.countInformesEmitidos(user.uid);
 
         if (mounted) {
           setState(() {
@@ -85,6 +86,7 @@ class _DashboardPageState extends State<DashboardPage> {
             _lotesRecientes = recientes;
             _todosLotesActivos = todosActivos;
             _pendingSyncCount = pending;
+            _informesCount = informes;
             _isLoading = false;
           });
         }
@@ -153,7 +155,7 @@ class _DashboardPageState extends State<DashboardPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text(
-                  '¿A qué lote desea registrar el evento?',
+                  '¿A qué lote desea registrar su accion?',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1F2937)),
                 ),
                 const SizedBox(height: 16),
@@ -257,13 +259,15 @@ class _DashboardPageState extends State<DashboardPage> {
         selectedItemColor: primary,
         unselectedItemColor: Colors.grey.shade500,
         type: BottomNavigationBarType.fixed,
-        onTap: (index) {
-          if (index == 1) Navigator.pushNamed(context, '/predios');
-          if (index == 2 || index == 3) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Módulo próximamente disponible')));
-          }
-          setState(() => _currentIndex = index);
-        },
+        // En el onTap del BottomNavigationBar de dashboard_page.dart
+onTap: (index) {
+  if (index == 0) return; // Ya estamos en inicio
+  if (index == 1) Navigator.pushNamed(context, '/predios');
+  if (index == 2) _seleccionarLoteParaEvento('/informes/lista');
+  if (index == 3) Navigator.pushNamed(context, '/profile'); // <-- ¡Agrega esto!
+  
+  setState(() => _currentIndex = index);
+},
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Inicio'),
           BottomNavigationBarItem(icon: Icon(Icons.landscape_outlined), label: 'Predios'),
@@ -408,7 +412,7 @@ class _DashboardPageState extends State<DashboardPage> {
         _buildActionCard('Registrar siembra', 'Guarde fecha, especie, variedad y área sembrada.', Icons.grass, () => _seleccionarLoteParaEvento('/eventos/crear_siembra')),
         _buildActionCard('Registrar insumo', 'Agregue dosis, método, responsable y motivo.', Icons.science_outlined, () => _seleccionarLoteParaEvento('/eventos/crear_insumo')),
         _buildActionCard('Registrar cosecha', 'Documente cantidad, área y destino de producción.', Icons.shopping_basket_outlined, () => _seleccionarLoteParaEvento('/eventos/crear_cosecha')),
-        _buildActionCard('Crear informe ICA', 'Inicie el flujo trisemestral del lote.', Icons.description_outlined, () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Próximamente')))),
+        _buildActionCard('Crear informe ICA', 'Inicie el flujo trisemestral del lote.', Icons.description_outlined, () => _seleccionarLoteParaEvento('/informes/lista')),
       ],
     );
   }
@@ -497,7 +501,11 @@ class _DashboardPageState extends State<DashboardPage> {
               const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () {},
+                 onPressed: () => Navigator.pushNamed(
+  context,
+  '/informes/lista',
+  arguments: lote,
+),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: primary,
                     side: BorderSide(color: primary),

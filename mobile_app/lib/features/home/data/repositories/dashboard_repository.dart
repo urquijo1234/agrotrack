@@ -56,4 +56,14 @@ class DashboardRepository {
 
     return snapshot.docs.map((doc) => Lote.fromMap(doc.data())).toList();
   }
+
+  Future<int> countInformesEmitidos(String uid) async {
+    final snapshot = await _firestore
+        .collection('informesFitosanitarios')
+        .where('productorId', isEqualTo: uid)
+        .where('estadoInforme', isEqualTo: 'EXPORTADO')
+        .count()
+        .get();
+    return snapshot.count ?? 0;
+  }
 }
