@@ -119,6 +119,91 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> _mostrarDialogoRecuperacion(BuildContext context) async {
+    final emailRecoveryController = TextEditingController();
+    // Sugerir el correo si el usuario ya escribió uno en el campo principal
+    if (_emailController.text.isNotEmpty) {
+      emailRecoveryController.text = _emailController.text;
+    }
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        bool isSending = false;
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Recuperar contraseña'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Ingrese su correo electrónico para recibir un enlace de recuperación.'),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: emailRecoveryController,
+                    decoration: const InputDecoration(
+                      labelText: 'Correo electrónico',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSending ? null : () => Navigator.pop(dialogContext),
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton(
+                  onPressed: isSending
+                      ? null
+                      : () async {
+                          final email = emailRecoveryController.text.trim();
+                          if (email.isEmpty) {
+                            ScaffoldMessenger.of(dialogContext).showSnackBar(
+                              const SnackBar(content: Text('Por favor, ingrese un correo válido')),
+                            );
+                            return;
+                          }
+
+                          setState(() => isSending = true);
+                          try {
+                            await _repository.resetPassword(email);
+                            if (!dialogContext.mounted) return;
+                            Navigator.pop(dialogContext);
+                            ScaffoldMessenger.of(this.context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Se ha enviado un enlace de recuperación a su correo.'),
+                              ),
+                            );
+                          } catch (e) {
+                            setState(() => isSending = false);
+                            if (!dialogContext.mounted) return;
+                            ScaffoldMessenger.of(dialogContext).showSnackBar(
+                              const SnackBar(content: Text('Ocurrió un error al enviar el correo.')),
+                            );
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2E7D32),
+                    foregroundColor: Colors.white,
+                  ),
+                  child: isSending
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : const Text('Enviar'),
+                ),
+              ],
+            );
+          }
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     const primary = Color(0xFF2E7D32);
@@ -210,7 +295,21 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 28),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => _mostrarDialogoRecuperacion(context),
+                    child: const Text(
+                      '¿Olvidó su contraseña?',
+                      style: TextStyle(
+                        color: Color(0xFF2E7D32), // Tu verde AgroTrack
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
 
                 SizedBox(
                   width: double.infinity,

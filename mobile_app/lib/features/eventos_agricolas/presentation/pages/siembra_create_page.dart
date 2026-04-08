@@ -182,6 +182,7 @@ class _SiembraCreatePageState extends State<SiembraCreatePage> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: DropdownButtonFormField<String>(
+                    isExpanded: true,
                     value: _unidadCantidad,
                     decoration: const InputDecoration(
                       labelText: 'Unidad', filled: true, fillColor: Colors.white,

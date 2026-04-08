@@ -62,4 +62,16 @@ class AuthRepository {
   Future<void> logout() async {
     await _authService.signOut();
   }
+
+
+ Future<void> resetPassword(String email) async {
+    try {
+     
+      await _authService.sendPasswordResetEmail(email: email.trim());
+    } on FirebaseAuthException catch (e) {
+      // Opcional: Puedes mapear errores específicos aquí
+      // ej: if (e.code == 'user-not-found') ...
+      rethrow; 
+    }
+  }
 }
