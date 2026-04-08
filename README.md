@@ -33,7 +33,7 @@ AgroTrack es una solución móvil diseñada para digitalizar las operaciones en 
 
 ## 🚀 Instalación y Uso
 
-1. Ve a la sección de [Releases](https://github.com/tu-usuario/agrotrack/releases) y descarga el último APK.
+1. Ve a la sección de [Releases](https://github.com/urquijo1234/agrotrack/releases) y descarga el último APK.
 2. Instala el archivo en tu dispositivo Android.
 3. ¡Comienza a digitalizar tu producción!
 
